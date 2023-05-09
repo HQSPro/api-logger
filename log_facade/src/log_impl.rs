@@ -1,23 +1,47 @@
-use std::{collections::{BTreeSet, BTreeMap}, sync::atomic::AtomicU32};
+use std::{collections::{BTreeSet, BTreeMap}, sync::atomic::AtomicU32, fmt::Display, ops::{BitAnd, Deref, BitOr}};
 
-pub const TRACE: u32 = 0b00000000_00000000_00000000_00000001;
-pub const DEBUG: u32 = 0b00000000_00000000_00000000_00000010;
-pub const INFO: u32 = 0b00000000_00000000_00000000_00000100;
-pub const WARN: u32 = 0b00000000_00000000_00000000_00001000;
-pub const ERROR: u32 = 0b00000000_00000000_00000000_00010000;
-pub const FATAL: u32 = 0b00000000_00000000_00000000_00100000;
+
+pub const FATAL: u32 = 0b00000000_00000000_00000000_00000001;
+pub const ERROR: u32 = 0b00000000_00000000_00000000_00000010;
+pub const WARN: u32 = 0b00000000_00000000_00000000_00000100;
+pub const INFO: u32 = 0b00000000_00000000_00000000_00001000;
+pub const DEBUG: u32 = 0b00000000_00000000_00000000_00010000;
+pub const TRACE: u32 = 0b00000000_00000000_00000000_00100000;
 pub const LOG_NON: u32 = 0b00000000_00000000_00000000_00000000;
-pub const LOG_ALL: u32 = 0b11111111_11111111_11111111_11111111;
+
+
 
 const UNINIT: usize = 0;
 static STATUS: AtomicUsize = AtomicUsize::new(UNINIT);
 static GLOBAL_LOGGER_ID: AtomicU32 = AtomicU32::new(0);
 
+pub struct LogBitMask(u32);
+
+impl Display for LogBitMask {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.0 {
+            TRACE => write!(f, "{}", "TRACE"),
+            DEBUG => write!(f, "{}", "DEBUG"),
+            INFO => write!(f, "{}", "INFO"),
+            WARN => write!(f, "{}", "WARN"),
+            ERROR => write!(f, "{}", "ERROR"),
+            FATAL => write!(f, "{}", "FATAL"),
+            _ => write!(f, "{:X}", self.0),
+        }
+    }
+}
+impl Deref for LogBitMask {
+    type Target = u32;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub trait Log {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LogMask(u32);
+pub struct LogMask(u32)
 impl LogMask {
     #[inline(always)]
     pub fn new(mask: u32) -> Self {

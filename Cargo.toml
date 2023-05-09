@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "api_logger",
-    "log_facade"
+    "log_facade",
+    "log_proc"
 ]
 
